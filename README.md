@@ -20,8 +20,8 @@ Ini adalah proyek aplikasi web untuk mendeteksi digit tulisan tangan (0-9) secar
 ## Teknologi yang Digunakan
 
 -   **Backend**: Python, Flask
--   **Machine Learning**: TensorFlow, Keras
--   **Computer Vision**: OpenCV, NumPy
+-   **Machine Learning**: TensorFlow, Keras, NumPy
+-   **Computer Vision**: OpenCV
 -   **Frontend**: HTML, CSS, JavaScript (Vanilla)
 
 ---
@@ -91,12 +91,3 @@ Gunakan tombol keyboard berikut saat jendela browser aktif:
 
 ---
 
-## Struktur Proyek
-.
-├── app.py                      # Server Flask
-├── main.py                     # Class HandwritingDetector
-├── handwriting_model_augmented.h5 # Model Keras
-├── requirements.txt            # Daftar paket Python
-├── README.md                   # File ini
-└── templates/
-  └── index.html              # Halaman web
