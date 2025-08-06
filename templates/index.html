@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwriting Detection</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            /* Terapkan font baru */
+            font-family: 'Google Sans Code', monospace;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .video-container {
+            border: 2px solid #333;
+            background-color: #000;
+            width: 640px;
+            height: 480px;
+        }
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 250px;
+        }
+        .prediction-window {
+            border: 2px solid #333;
+            background-color: #000;
+            width: 150px;
+            height: 150px;
+            margin: auto;
+        }
+        .info-box {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #ffffff;
+            border-bottom: 2px solid #4a4a4a;
+            padding-bottom: 5px;
+            margin-top: 0;
+            font-weight: 500;
+        }
+        pre {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            /* Sesuaikan ukuran font instruksi agar lebih kecil */
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .status-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        #ensemble-status {
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        /* Kelas warna untuk status ON/OFF */
+        .on { color: #121212; background-color: #81C784; } /* Hijau */
+        .off { color: #121212; background-color: #FFAB91; } /* Oranye */
+
+        #status-log {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #64B5F6; /* Biru */
+            font-size: 14px;
+            text-align: center;
+        }
+        img {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Handwriting Detection Live</h1>
+        <div class="video-container">
+            <img src="{{ url_for('video_feed') }}" alt="Camera Feed">
+        </div>
+    </div>
+
+    <div class="side-panel">
+        <div class="info-box">
+            <h2>Hasil Prediksi</h2>
+            <div class="prediction-window">
+                <img src="{{ url_for('prediction_feed') }}" alt="Prediction">
+            </div>
+        </div>
+        <div class="info-box">
+            <h2>Instruksi & Kontrol</h2>
+            <div class="status-container">
+                <span>Ensemble Mode</span>
+                <span id="ensemble-status" class="">{{ initial_ensemble_mode }}</span>
+            </div>
+            <pre>
+Tulis digit (0-9) di depan kamera.
+
+Kontrol Keyboard:
+-f: Nyalakan / Matikan Kamera
+-e: Ganti Mode Ensemble
+-r: Reset Deteksi
+            </pre>
+            <div id="status-log">Kamera Mati. Tekan 'f' untuk mulai.</div>
+        </div>
+    </div>
+
+    <script>
+        const statusLog = document.getElementById('status-log');
+        const ensembleStatus = document.getElementById('ensemble-status');
+
+        // Fungsi untuk mengatur kelas warna pada status ensemble
+        function setEnsembleStatusClass() {
+            if (ensembleStatus.textContent === 'ON') {
+                ensembleStatus.className = 'on';
+            } else {
+                ensembleStatus.className = 'off';
+            }
+        }
+
+        // Atur warna awal saat halaman dimuat
+        setEnsembleStatusClass();
+
+        document.addEventListener('keydown', function(event) {
+            let endpoint = '';
+            // Hanya kirim request jika tombol yang ditekan adalah f, e, atau r
+            switch (event.key.toLowerCase()) {
+                case 'f':
+                    endpoint = '/toggle_camera';
+                    break;
+                case 'e':
+                    endpoint = '/toggle_ensemble';
+                    break;
+                case 'r':
+                    endpoint = '/reset_detection';
+                    break;
+                default:
+                    return; // Keluar jika bukan tombol kontrol
+            }
+
+            // Mencegah aksi default browser (misal: 'f' untuk find)
+            event.preventDefault();
+
+            // Kirim request ke backend
+            fetch(endpoint, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.status);
+                    statusLog.textContent = data.status;
+
+                    // Cek jika data berasal dari /toggle_ensemble
+                    if (data.hasOwnProperty('ensemble_mode')) {
+                        ensembleStatus.textContent = data.ensemble_mode;
+                        setEnsembleStatusClass(); // Perbarui warna
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusLog.textContent = 'Error: Gagal menghubungi server.';
+                });
+        });
+    </script>
+
+</body>
+</html>
