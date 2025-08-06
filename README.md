@@ -76,7 +76,9 @@ Untuk menjalankan proyek ini di komputer lokal Anda, ikuti langkah-langkah berik
     ```
 3.  Buka browser Anda dan akses alamat berikut:
     ```
-    [http://127.0.0.1:5000](http://127.0.0.1:5000)
+     * Running on all addresses (0.0.0.0)
+     * Running on http://127.0.0.1:5000
+     * Running on http://172.29.169.212:5000
     ```
 
 ---
